@@ -1,0 +1,29 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up TIMESTAMP_TAG
+      id: vars
+      run: echo "TIMESTAMP_TAG=$(date +%s)" >> $GITHUB_ENV
+
+    - name: Docker Login
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag zhu0823/foldersync:${{ env.TIMESTAMP_TAG }} --tag zhu0823/foldersync:latest
+
+    - name: Push the Docker image to Docker Hub
+      run: |
+        docker push zhu0823/foldersync:${{ env.TIMESTAMP_TAG }}
+        docker push zhu0823/foldersync:latest
